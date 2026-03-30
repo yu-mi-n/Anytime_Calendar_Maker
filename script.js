@@ -96,8 +96,13 @@ function renderCalendar(date) {
         const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
         if (holidays[formattedDate]) {
             dayDiv.classList.add('holiday');
+            let holidayName = holidays[formattedDate];
+            // 「憲法記念日 振替休日」が長すぎるため特別に短縮する
+            if (holidayName === '憲法記念日 振替休日') {
+                holidayName = '憲法記念日 振替';
+            }
             // 祝日名をヘッダーに設定
-            holidaySpan.textContent = holidays[formattedDate];
+            holidaySpan.textContent = holidayName;
         }
         
         // 休・退会/お手続〆日を判定して追記
