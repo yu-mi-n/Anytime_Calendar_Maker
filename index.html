@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カレンダー作成アプリ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 印刷対象外のコントロールパネル -->
+    <div class="control-panel no-print">
+        <h1>カレンダーつくる君</h1>
+        
+        <div class="control-group">
+            <label for="year-select">表示年月:</label>
+            <div class="select-wrapper">
+                <select id="year-select"></select> 年
+                <select id="month-select">
+                    <option value="0">1</option>
+                    <option value="1">2</option>
+                    <option value="2">3</option>
+                    <option value="3">4</option>
+                    <option value="4">5</option>
+                    <option value="5">6</option>
+                    <option value="6">7</option>
+                    <option value="7">8</option>
+                    <option value="8">9</option>
+                    <option value="9">10</option>
+                    <option value="10">11</option>
+                    <option value="11">12</option>
+                </select> 月
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <label>文字色:</label>
+            <div class="color-input-wrapper">
+                <input type="color" id="text-color-picker" value="#000000">
+                <input type="text" id="text-color-code" value="#000000" maxlength="7">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>クリックモード:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="click-mode" value="no-staff" checked> スタッフ不在日</label>
+                <label><input type="radio" name="click-mode" value="coloring"> 塗りつぶし</label>
+            </div>
+        </div>
+
+        <div id="color-picker-group" class="control-group" style="display: none;">
+            <label>塗りつぶし色:</label>
+            <div class="color-input-wrapper">
+                <input type="color" id="bg-color-picker" value="#e6e6fa">
+                <input type="text" id="bg-color-code" value="#e6e6fa" maxlength="7">
+            </div>
+        </div>
+
+        <p class="warning-text">＊誤っている場合があるため、必ず正しいか確認してください</p>
+    </div>
+
+    <!-- 印刷対象のカレンダー領域 -->
+    <div class="calendar-container">
+        <div class="calendar-grid">
+            <div class="day-name">月</div>
+            <div class="day-name">火</div>
+            <div class="day-name">水</div>
+            <div class="day-name">木</div>
+            <div class="day-name">金</div>
+            <div class="day-name">土</div>
+            <div class="day-name">日</div>
+        </div>
+        <div class="calendar-grid" id="calendar-days">
+            </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
