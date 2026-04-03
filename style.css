@@ -100,6 +100,34 @@ select {
     line-height: 1.4;
 }
 
+.action-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.2s;
+}
+
+.action-button:hover {
+    background-color: #45a049;
+}
+
+.copy-btn {
+    background-color: #2196F3; /* 青色 */
+    margin-top: 10px;
+}
+
+.copy-btn:hover {
+    background-color: #1976D2;
+}
+
 .calendar-container {
     width: 100%;
     max-width: 1000px;
@@ -188,6 +216,11 @@ select {
     font-weight: bold;
 }
 
+.small-text {
+    font-size: 0.6rem;
+    line-height: 1.1;
+}
+
 .auto-generated-text {
     font-weight: bold;
     color: #0000FF; /* Excel標準の青 */
@@ -214,6 +247,20 @@ select {
 
 .calendar-day.empty {
     background-color: #fafafa; /* 空白マスも枠線を残し、少しグレーにして表の一部にする */
+}
+
+/* --- レスポンシブ対応（画面幅が狭い場合） --- */
+@media screen and (max-width: 1024px) {
+    body {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .control-panel {
+        width: 100%;
+        max-width: 1000px;
+        box-sizing: border-box;
+    }
 }
 
 /* --- 印刷用のスタイル --- */

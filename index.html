@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>カレンダー作成アプリ</title>
     <link rel="stylesheet" href="style.css">
+    <!-- 画像化のためのライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <!-- 印刷対象外のコントロールパネル -->
@@ -57,6 +59,8 @@
         </div>
 
         <p class="warning-text">＊誤っている場合があるため、必ず正しいか確認してください</p>
+        <button id="pdf-button" class="action-button">PDF化する</button>
+        <button id="copy-button" class="action-button copy-btn">画像としてコピー</button>
     </div>
 
     <!-- 印刷対象のカレンダー領域 -->

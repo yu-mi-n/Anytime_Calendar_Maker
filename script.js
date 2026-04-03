@@ -7,6 +7,8 @@ const bgColorPicker = document.getElementById('bg-color-picker');
 const bgColorCode = document.getElementById('bg-color-code');
 const textColorPicker = document.getElementById('text-color-picker');
 const textColorCode = document.getElementById('text-color-code');
+const pdfButton = document.getElementById('pdf-button');
+const copyButton = document.getElementById('copy-button');
 
 let currentDate = new Date();
 let holidays = {}; // 取得した祝日データを格納するオブジェクト
@@ -93,16 +95,19 @@ function renderCalendar(date) {
         });
 
         // 祝日かどうかを判定
+        let isHoliday = false;
+        let holidayNameStr = '';
         const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
         if (holidays[formattedDate]) {
+            isHoliday = true;
             dayDiv.classList.add('holiday');
-            let holidayName = holidays[formattedDate];
+            holidayNameStr = holidays[formattedDate];
             // 「憲法記念日 振替休日」が長すぎるため特別に短縮する
-            if (holidayName === '憲法記念日 振替休日') {
-                holidayName = '憲法記念日 振替';
+            if (holidayNameStr === '憲法記念日 振替休日') {
+                holidayNameStr = '憲法記念日 振替';
             }
             // 祝日名をヘッダーに設定
-            holidaySpan.textContent = holidayName;
+            holidaySpan.textContent = holidayNameStr;
         }
         
         // 休・退会/お手続〆日を判定して追記
@@ -134,17 +139,33 @@ function renderCalendar(date) {
                 // 「スタッフ不在日」をトグル
                 if (dayDiv.classList.contains('no-staff-day')) {
                     dayDiv.classList.remove('no-staff-day');
-                    inputArea.innerHTML = inputArea.innerHTML.replace(/\n?<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY<\/span>/, '').replace(/\n?ノースタッフデー/, '').trim();
+                    inputArea.innerHTML = inputArea.innerHTML.replace(/\n?<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY<\/span>/g, '').replace(/\n?ノースタッフデー/g, '').trim();
+                    holidaySpan.innerHTML = holidaySpan.innerHTML.replace(/<span class="no-staff-text small-text">スタッフ不在日<br>NO STAFF DAY<\/span>/g, '');
+                    if (isHoliday) {
+                        holidaySpan.textContent = holidayNameStr; // 祝日名を復元
+                    }
                 } else {
                     dayDiv.classList.add('no-staff-day');
-                    const existingText = inputArea.innerHTML;
-                    inputArea.innerHTML = (existingText ? existingText + '\n' : '') + '<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY</span>';
+                    const existingText = inputArea.textContent.trim();
+                    
+                    if (existingText !== '') {
+                        // 文字が入力されている場合は、祝日名領域に小さく出す
+                        holidaySpan.innerHTML = '<span class="no-staff-text small-text">スタッフ不在日<br>NO STAFF DAY</span>';
+                    } else {
+                        // 文字がない場合は入力欄に大きく出す
+                        const currentInput = inputArea.innerHTML;
+                        inputArea.innerHTML = (currentInput ? currentInput + '\n' : '') + '<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY</span>';
+                    }
                 }
             } else { // currentMode === 'coloring'
                 // ノースタッフデーモードのスタイルとテキストを解除
                 if (dayDiv.classList.contains('no-staff-day')) {
                     dayDiv.classList.remove('no-staff-day');
-                    inputArea.innerHTML = inputArea.innerHTML.replace(/\n?<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY<\/span>/, '').replace(/\n?ノースタッフデー/, '').trim();
+                    inputArea.innerHTML = inputArea.innerHTML.replace(/\n?<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY<\/span>/g, '').replace(/\n?ノースタッフデー/g, '').trim();
+                    holidaySpan.innerHTML = holidaySpan.innerHTML.replace(/<span class="no-staff-text small-text">スタッフ不在日<br>NO STAFF DAY<\/span>/g, '');
+                    if (isHoliday) {
+                        holidaySpan.textContent = holidayNameStr; // 祝日名を復元
+                    }
                 }
 
                 // 色のトグル（色がついていれば消し、なければ塗る）
@@ -239,6 +260,38 @@ clickModeRadios.forEach(radio => {
             colorPickerGroup.style.display = 'none';
         }
     });
+});
+
+// PDF化ボタンのイベント
+pdfButton.addEventListener('click', () => {
+    window.print();
+});
+
+// 画像としてコピーボタンのイベント
+copyButton.addEventListener('click', async () => {
+    const calendarContainer = document.querySelector('.calendar-container');
+    const originalText = copyButton.textContent;
+    
+    try {
+        copyButton.textContent = 'コピー中...';
+        copyButton.disabled = true;
+        
+        // カレンダー領域を画像（Canvas）に変換
+        const canvas = await html2canvas(calendarContainer);
+        
+        // Canvasを画像データ（Blob）に変換してクリップボードに書き込む
+        canvas.toBlob(async (blob) => {
+            const item = new ClipboardItem({ 'image/png': blob });
+            await navigator.clipboard.write([item]);
+            alert('カレンダーを画像としてコピーしました！\nPowerPoint等に「貼り付け(Ctrl+V / Cmd+V)」できます。');
+        }, 'image/png');
+    } catch (err) {
+        console.error('コピーに失敗しました:', err);
+        alert('コピーに失敗しました。');
+    } finally {
+        copyButton.textContent = originalText;
+        copyButton.disabled = false;
+    }
 });
 
 // 初期化処理
