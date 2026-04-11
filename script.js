@@ -102,10 +102,8 @@ function renderCalendar(date) {
             isHoliday = true;
             dayDiv.classList.add('holiday');
             holidayNameStr = holidays[formattedDate];
-            // 「憲法記念日 振替休日」が長すぎるため特別に短縮する
-            if (holidayNameStr === '憲法記念日 振替休日') {
-                holidayNameStr = '憲法記念日 振替';
-            }
+            // 「振替休日」が長すぎるため「(振)」に短縮する
+            holidayNameStr = holidayNameStr.replace(/\s?振替休日/, '(振)');
             // 祝日名をヘッダーに設定
             holidaySpan.textContent = holidayNameStr;
         }
@@ -269,6 +267,11 @@ pdfButton.addEventListener('click', () => {
 
 // 画像としてコピーボタンのイベント
 copyButton.addEventListener('click', async () => {
+    if (typeof html2canvas === 'undefined') {
+        alert('画像生成処理の準備ができていません。画面を再読み込みするか、少し待ってから再度お試しください。');
+        return;
+    }
+
     const calendarContainer = document.querySelector('.calendar-container');
     const originalText = copyButton.textContent;
     
@@ -276,11 +279,34 @@ copyButton.addEventListener('click', async () => {
         copyButton.textContent = 'コピー中...';
         copyButton.disabled = true;
         
-        // カレンダー領域を画像（Canvas）に変換
-        const canvas = await html2canvas(calendarContainer);
+        // カレンダー領域を画像（Canvas）に変換 (余白を削って画像化)
+        const originalCanvas = await html2canvas(calendarContainer, {
+            // 画質を担保するために、元の描画解像度を高めに設定
+            scale: window.devicePixelRatio > 1 ? window.devicePixelRatio : 2,
+            onclone: (clonedDocument) => {
+                const clonedContainer = clonedDocument.querySelector('.calendar-container');
+                clonedContainer.style.padding = '0';
+                clonedContainer.style.borderRadius = '0';
+                clonedContainer.style.boxShadow = 'none';
+            }
+        });
+
+        // 大きさを等比で2割削る（80%にする）ための新しいCanvasを作成
+        const scaledCanvas = document.createElement('canvas');
+        const scaleFactor = 0.8; // 80%
+        scaledCanvas.width = originalCanvas.width * scaleFactor;
+        scaledCanvas.height = originalCanvas.height * scaleFactor;
+
+        const ctx = scaledCanvas.getContext('2d');
+        // 縮小時の画質（解像度）を綺麗に保つための設定
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // 高解像度で描画した元のCanvasを、新しいCanvasに縮小して描画
+        ctx.drawImage(originalCanvas, 0, 0, scaledCanvas.width, scaledCanvas.height);
         
-        // Canvasを画像データ（Blob）に変換してクリップボードに書き込む
-        canvas.toBlob(async (blob) => {
+        // 縮小したCanvasを画像データ（Blob）に変換してクリップボードに書き込む
+        scaledCanvas.toBlob(async (blob) => {
             const item = new ClipboardItem({ 'image/png': blob });
             await navigator.clipboard.write([item]);
             alert('カレンダーを画像としてコピーしました！\nPowerPoint等に「貼り付け(Ctrl+V / Cmd+V)」できます。');

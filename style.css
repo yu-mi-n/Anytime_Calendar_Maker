@@ -120,7 +120,7 @@ select {
 }
 
 .copy-btn {
-    background-color: #2196F3; /* 青色 */
+    background-color: #2196F3;
     margin-top: 10px;
 }
 
@@ -141,19 +141,24 @@ select {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
-    border-left: 1px solid #ddd;
+    border-left: 2px solid #ddd;
+}
+
+#calendar-days {
+    grid-auto-rows: 1fr; /* 最も高いマスに合わせて、すべての週の高さを均等にする */
 }
 
 .calendar-grid:first-of-type {
-    border-top: 1px solid #ddd;
+    border-top: 2px solid #ddd;
 }
 
 .day-name {
     font-weight: bold;
     color: #555;
     background-color: #f0f0f0;
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-right: 2px solid #ddd;
+    border-bottom: 2px solid #ddd;
+    font-size: 1.3rem;
 }
 
 .day-name:nth-child(6) { /* 土曜日 */
@@ -165,11 +170,11 @@ select {
 }
 
 .calendar-day {
-    padding: 5px;
+    padding: 3px;
     border-radius: 0;
     background-color: #fff;
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-right: 2px solid #ddd;
+    border-bottom: 2px solid #ddd;
     min-height: 80px;
     display: flex;
     flex-direction: column;
@@ -180,7 +185,7 @@ select {
 }
 
 .calendar-day.no-staff-day {
-    background-color: #fff9c4; /* 薄黄色 */
+    background-color: #fff9c4; 
 }
 
 .day-header {
@@ -190,14 +195,14 @@ select {
 
 .date-number {
     line-height: 1;
-    font-size: 0.9rem;
+    font-size: 1.17rem;
 }
 
 .holiday-name {
-    flex-grow: 1; /* 残りの空間を全て占有させる */
-    text-align: center; /* その中で中央揃えにする */
-    color: #d32f2f; /* 祝日の色（赤） */
-    font-size: 0.8rem;
+    flex-grow: 1;
+    text-align: center;
+    color: #d32f2f;
+    font-size: 1.04rem;
     font-weight: bold;
     line-height: 1;
 }
@@ -217,8 +222,9 @@ select {
 }
 
 .small-text {
-    font-size: 0.6rem;
-    line-height: 1.1;
+    font-size: 0.65rem;
+    line-height: 1;
+    display: inline-block;
 }
 
 .auto-generated-text {
@@ -235,9 +241,9 @@ select {
     border: 1px dashed transparent;
     border-radius: 4px;
     padding: 2px;
-    font-size: 0.9rem;
+    font-size: 1rem; 
     outline: none;
-    white-space: pre-wrap; /* 改行コードを画面表示に反映させる */
+    white-space: pre-wrap; 
 }
 
 .day-input:focus {
@@ -246,7 +252,7 @@ select {
 }
 
 .calendar-day.empty {
-    background-color: #fafafa; /* 空白マスも枠線を残し、少しグレーにして表の一部にする */
+    background-color: #fafafa;
 }
 
 /* --- レスポンシブ対応（画面幅が狭い場合） --- */
@@ -266,37 +272,38 @@ select {
 /* --- 印刷用のスタイル --- */
 @media print {
     body {
-        background-color: #fff; /* 背景を白に */
+        background-color: #fff; 
         margin: 0;
         padding: 0;
     }
     .no-print {
-        display: none !important; /* コントロールパネルを印刷しない */
+        display: none !important; 
     }
     .calendar-container {
-        box-shadow: none; /* 影を消す */
+        box-shadow: none; 
         max-width: none;
         width: 100vw; /* 用紙の横幅いっぱいに */
         height: 100vh; /* 用紙の高さにいっぱいに */
-        padding: 10mm; /* 用紙の端からの余白（お好みで調整可能） */
+        padding: 0; /* カレンダー枠外の余白をなくす */
+        border-radius: 0; /* 角丸をなくす */
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
         overflow: hidden; /* はみ出しによる2ページ目の空白出力を防ぐ */
     }
     #calendar-days {
-        flex-grow: 1; /* カレンダーのマス目部分を残りの高さ一杯に広げる */
-        grid-auto-rows: 1fr; /* 各週の行の高さを均等にする */
+        flex-grow: 1; 
+        grid-auto-rows: 1fr; 
     }
     .calendar-day {
-        min-height: auto; /* 最小高さを解除して紙のサイズに順応させる */
+        min-height: auto; 
     }
     .day-input {
-        border: none; /* 印刷時は入力エリアの点線を消す */
+        border: none;
     }
     /* A4横向き印刷の推奨設定 */
     @page {
         size: A4 landscape;
-        margin: 0; /* ブラウザのデフォルトヘッダー・フッターを消す */
+        margin: 0;
     }
 }
