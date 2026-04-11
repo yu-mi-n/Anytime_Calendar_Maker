@@ -116,7 +116,7 @@ function renderCalendar(date) {
         }
         
         // 口座振替引き落とし日を判定して追記
-        if (debitDate.getMonth() === month && i === debitDate.getDate()) {あ
+        if (debitDate.getMonth() === month && i === debitDate.getDate()) {
             const existingText = inputArea.innerHTML;
             const newText = `<span class="auto-generated-text">${month + 1}月分会費\n引き落とし日\n（口座振替の方）</span>`;
             inputArea.innerHTML = (existingText ? existingText + '\n' : '') + newText;
@@ -291,9 +291,9 @@ copyButton.addEventListener('click', async () => {
             }
         });
 
-        // 大きさを等比で2割削る（80%にする）ための新しいCanvasを作成
+        // 今のサイズからさらに2割削る（元の64%にする）
         const scaledCanvas = document.createElement('canvas');
-        const scaleFactor = 0.8; // 80%
+        const scaleFactor = 0.64; // 0.8 * 0.8 = 0.64
         scaledCanvas.width = originalCanvas.width * scaleFactor;
         scaledCanvas.height = originalCanvas.height * scaleFactor;
 

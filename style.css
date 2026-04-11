@@ -222,7 +222,7 @@ select {
 }
 
 .small-text {
-    font-size: 0.65rem;
+    font-size: 0.6825rem;
     line-height: 1;
     display: inline-block;
 }
@@ -241,7 +241,7 @@ select {
     border: 1px dashed transparent;
     border-radius: 4px;
     padding: 2px;
-    font-size: 1rem; 
+    font-size: 0.9rem; 
     outline: none;
     white-space: pre-wrap; 
 }
