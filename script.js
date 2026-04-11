@@ -116,7 +116,7 @@ function renderCalendar(date) {
         }
         
         // 口座振替引き落とし日を判定して追記
-        if (debitDate.getMonth() === month && i === debitDate.getDate()) {
+        if (debitDate.getMonth() === month && i === debitDate.getDate()) {あ
             const existingText = inputArea.innerHTML;
             const newText = `<span class="auto-generated-text">${month + 1}月分会費\n引き落とし日\n（口座振替の方）</span>`;
             inputArea.innerHTML = (existingText ? existingText + '\n' : '') + newText;
