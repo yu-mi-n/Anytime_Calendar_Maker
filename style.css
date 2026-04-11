@@ -141,7 +141,7 @@ select {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
-    border-left: 2px solid #ddd;
+    border-left: 3px solid #000;
 }
 
 #calendar-days {
@@ -149,15 +149,15 @@ select {
 }
 
 .calendar-grid:first-of-type {
-    border-top: 2px solid #ddd;
+    border-top: 3px solid #000;
 }
 
 .day-name {
     font-weight: bold;
     color: #555;
     background-color: #f0f0f0;
-    border-right: 2px solid #ddd;
-    border-bottom: 2px solid #ddd;
+    border-right: 3px solid #000;
+    border-bottom: 3px solid #000;
     font-size: 1.3rem;
 }
 
@@ -173,8 +173,8 @@ select {
     padding: 3px;
     border-radius: 0;
     background-color: #fff;
-    border-right: 2px solid #ddd;
-    border-bottom: 2px solid #ddd;
+    border-right: 3px solid #000;
+    border-bottom: 3px solid #000;
     min-height: 80px;
     display: flex;
     flex-direction: column;
