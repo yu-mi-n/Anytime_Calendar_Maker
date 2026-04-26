@@ -347,8 +347,8 @@ copyButton.addEventListener('click', async () => {
 async function init() {
     await fetchHolidays(); // 最初に祝日データを取得する
     populateYearSelect(currentDate.getFullYear());
-    monthSelect.value = currentDate.getMonth(); // 現在の月に設定
-    updateTextColor(); // 文字色の初期設定を適用
+    monthSelect.value = currentDate.getMonth();
+    updateTextColor(); 
     renderCalendar(currentDate);
 }
 

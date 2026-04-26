@@ -170,7 +170,7 @@ select {
 }
 
 .calendar-day {
-    padding: 3px 3px 6px 3px; /* 下の余白を通常の2倍(6px)に設定 */
+    padding: 3px 3px 13px 3px;
     border-radius: 0;
     background-color: #fff;
     border-right: 3px solid #000;
@@ -185,27 +185,27 @@ select {
 }
 
 .calendar-day.no-staff-day {
-    background-color: #ffeb3b; /* 彩度を上げた鮮やかな黄色に変更 */
+    background-color: #ffeb3b;
 }
 
 .day-header {
     display: flex;
     align-items: center;
-    margin-bottom: -2px; /* ヘッダーの余白を削って入力欄を上に引き上げる */
+    margin-bottom: -2px; 
 }
 
 .date-number {
-    line-height: 0.9; /* 高さを下げる */
-    font-size: 1.05rem; /* 1割縮小 (1.17rem -> 1.05rem) */
+    line-height: 0.9; 
+    font-size: 1.05rem; 
 }
 
 .holiday-name {
     flex-grow: 1;
     text-align: center;
     color: #d32f2f;
-    font-size: 0.94rem; /* 1割縮小 (1.04rem -> 0.94rem) */
+    font-size: 0.94rem;
     font-weight: bold;
-    line-height: 0.9; /* 高さを下げる */
+    line-height: 0.9; 
 }
 
 .calendar-day.sunday .date-number,
@@ -223,8 +223,8 @@ select {
 }
 
 .small-text {
-    font-size: 0.75rem; /* 潰れて見えないよう、元のサイズ感に少し大きくする */
-    line-height: 1.15; /* 行間を少し広げて読みやすくする */
+    font-size: 0.75rem; 
+    line-height: 1;
     display: inline-block;
 }
 
@@ -237,20 +237,20 @@ select {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* 入力文字を中央に配置 */
+    justify-content: center;
     text-align: center;
     border: 1px dashed transparent;
     border-radius: 4px;
-    padding: 4px 2px 2px 2px; /* 上部に少しだけ余白を持たせる */
+    padding: 4px 2px 2px 2px;
     font-size: 0.9rem; 
-    line-height: 1.4; /* デフォルトの行間を明示 */
+    line-height: 1.4;
     outline: none;
     white-space: pre-wrap; 
 }
 
 /* 3行目以上になった場合に適用される行間 */
 .day-input.compact-line-height {
-    line-height: 1.05; 
+    line-height: 1.2; 
 }
 
 .day-input:focus {
@@ -293,14 +293,14 @@ select {
     .calendar-container {
         box-shadow: none; 
         max-width: none;
-        width: 100vw; /* 用紙の横幅いっぱいに */
-        height: 100vh; /* 用紙の高さにいっぱいに */
-        padding: 0; /* カレンダー枠外の余白をなくす */
-        border-radius: 0; /* 角丸をなくす */
+        width: 100vw; 
+        height: 100vh; 
+        padding: 0; 
+        border-radius: 0; 
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        overflow: hidden; /* はみ出しによる2ページ目の空白出力を防ぐ */
+        overflow: hidden; 
     }
     #calendar-days {
         flex-grow: 1; 
