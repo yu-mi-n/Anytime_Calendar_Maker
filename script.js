@@ -304,8 +304,8 @@ copyButton.addEventListener('click', async () => {
         
         // カレンダー領域を画像（Canvas）に変換 (余白を削って画像化)
         const originalCanvas = await html2canvas(calendarContainer, {
-            // 画質を担保するために、元の描画解像度を高めに設定
-            scale: window.devicePixelRatio > 1 ? window.devicePixelRatio : 2,
+            // 画質を担保するために、元の描画解像度を高めに設定 (例: 4)
+            scale: 4,
             onclone: (clonedDocument) => {
                 const clonedContainer = clonedDocument.querySelector('.calendar-container');
                 clonedContainer.style.padding = '0';
@@ -314,25 +314,11 @@ copyButton.addEventListener('click', async () => {
             }
         });
 
-        // 今のサイズからさらに2割削る（元の64%にする）
-        const scaledCanvas = document.createElement('canvas');
-        const scaleFactor = 0.64; // 0.8 * 0.8 = 0.64
-        scaledCanvas.width = originalCanvas.width * scaleFactor;
-        scaledCanvas.height = originalCanvas.height * scaleFactor;
-
-        const ctx = scaledCanvas.getContext('2d');
-        // 縮小時の画質（解像度）を綺麗に保つための設定
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-
-        // 高解像度で描画した元のCanvasを、新しいCanvasに縮小して描画
-        ctx.drawImage(originalCanvas, 0, 0, scaledCanvas.width, scaledCanvas.height);
-        
-        // 縮小したCanvasを画像データ（Blob）に変換してクリップボードに書き込む
-        scaledCanvas.toBlob(async (blob) => {
+        // 生成した高解像度Canvasをそのまま画像データ（Blob）に変換してクリップボードに書き込む
+        originalCanvas.toBlob(async (blob) => {
             const item = new ClipboardItem({ 'image/png': blob });
             await navigator.clipboard.write([item]);
-            alert('カレンダーを画像としてコピーしました！\nPowerPoint等に「貼り付け(Ctrl+V / Cmd+V)」できます。');
+            alert('カレンダーを高画質な画像としてコピーしました！\nPowerPoint等に「貼り付け(Ctrl+V / Cmd+V)」できます。');
         }, 'image/png');
     } catch (err) {
         console.error('コピーに失敗しました:', err);
