@@ -185,7 +185,7 @@ select {
 }
 
 .calendar-day.no-staff-day {
-    background-color: #fff9c4; 
+    background-color: #ffeb3b; /* 彩度を上げた鮮やかな黄色に変更 */
 }
 
 .day-header {
@@ -243,8 +243,14 @@ select {
     border-radius: 4px;
     padding: 4px 2px 2px 2px; /* 上部に少しだけ余白を持たせる */
     font-size: 0.9rem; 
+    line-height: 1.4; /* デフォルトの行間を明示 */
     outline: none;
     white-space: pre-wrap; 
+}
+
+/* 3行目以上になった場合に適用される行間 */
+.day-input.compact-line-height {
+    line-height: 1.05; 
 }
 
 .day-input:focus {
