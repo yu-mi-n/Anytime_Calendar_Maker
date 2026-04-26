@@ -223,8 +223,8 @@ select {
 }
 
 .small-text {
-    font-size: 0.6825rem;
-    line-height: 1;
+    font-size: 0.75rem; /* 潰れて見えないよう、元のサイズ感に少し大きくする */
+    line-height: 1.15; /* 行間を少し広げて読みやすくする */
     display: inline-block;
 }
 
