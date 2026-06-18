@@ -260,6 +260,7 @@ select {
 
 .calendar-day.empty {
     background-color: #fafafa;
+    pointer-events: none;
 }
 
 /* --- レスポンシブ対応（画面幅が狭い場合） --- */

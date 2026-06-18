@@ -119,7 +119,7 @@ function renderCalendar(date) {
             isHoliday = true;
             dayDiv.classList.add('holiday');
             holidayNameStr = holidays[formattedDate];
-            // 「振替休日」が長すぎるため「(振)」に短縮する
+            // 「振替休日」を「(振)」に短縮
             holidayNameStr = holidayNameStr.replace(/\s?振替休日/, '(振)');
             // 祝日名をヘッダーに設定
             holidaySpan.textContent = holidayNameStr;
@@ -197,6 +197,14 @@ function renderCalendar(date) {
         
         // DOMに追加したあとに行間を調整（初期描画時の自動入力文字などを判定）
         updateLineHeight(inputArea);
+    }
+
+    const totalCells = firstDayIndex + lastDay;
+    const remainingCells = (7 - (totalCells % 7)) % 7;
+    for (let i = 0; i < remainingCells; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.classList.add('calendar-day', 'empty');
+        calendarDays.appendChild(emptyDiv);
     }
 }
 
@@ -302,9 +310,8 @@ copyButton.addEventListener('click', async () => {
         copyButton.textContent = 'コピー中...';
         copyButton.disabled = true;
         
-        // カレンダー領域を画像（Canvas）に変換 (余白を削って画像化)
+        // カレンダー領域を画像に変換
         const originalCanvas = await html2canvas(calendarContainer, {
-            // 画質を担保するために、元の描画解像度を高めに設定 (例: 4)
             scale: 4,
             onclone: (clonedDocument) => {
                 const clonedContainer = clonedDocument.querySelector('.calendar-container');
@@ -314,7 +321,7 @@ copyButton.addEventListener('click', async () => {
             }
         });
 
-        // 生成した高解像度Canvasをそのまま画像データ（Blob）に変換してクリップボードに書き込む
+        // 生成したCanvasを画像データに変換してクリップボードに書き込む
         originalCanvas.toBlob(async (blob) => {
             const item = new ClipboardItem({ 'image/png': blob });
             await navigator.clipboard.write([item]);
