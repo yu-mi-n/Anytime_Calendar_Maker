@@ -208,6 +208,32 @@ select {
     line-height: 0.9; 
 }
 
+/* 入力欄と祝日名を重ねるためのラッパー */
+.body-wrapper {
+    position: relative;
+    flex-grow: 1;
+    padding: 4px 2px 2px 2px; /* day-inputからpaddingをこちらに移動 */
+}
+
+/* 入力欄の下に表示される祝日名 */
+.holiday-name-body {
+    /* 重ねて中央に配置するためのスタイル */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none; /* クリックイベントが下の入力欄に届くようにする */
+
+    text-align: center;
+    color: #d32f2f; /* 元々の赤色 */
+    font-size: 0.94rem;
+    font-weight: bold;
+}
+
 .calendar-day.sunday .date-number,
 .calendar-day.holiday .date-number {
     color: #d32f2f; /* 日曜・祝日の日付を赤に */
@@ -234,6 +260,12 @@ select {
 }
 
 .day-input {
+    /* 重ねて表示するためのスタイル */
+    position: relative; /* z-indexを有効にするため */
+    z-index: 1; /* 祝日名より手前に表示 */
+    background-color: transparent; /* 後ろの祝日名が透けて見えるように */
+    width: 100%;
+    height: 100%;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -241,7 +273,6 @@ select {
     text-align: center;
     border: 1px dashed transparent;
     border-radius: 4px;
-    padding: 4px 2px 2px 2px;
     font-size: 0.9rem; 
     line-height: 1.4;
     outline: none;

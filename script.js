@@ -34,7 +34,7 @@ function renderCalendar(date) {
     const month = date.getMonth();
     
     // --- 口座振替日の計算ロジック ---
-    // 指定日が営業日（平日かつ祝日でない）かを判定するヘルパー関数
+    // 指定日が営業日（平日かつ祝日でない）かを判定するメソッド
     function isBusinessDay(d) {
         const dayOfWeek = d.getDay();
         if (dayOfWeek === 0 || dayOfWeek === 6) return false; // 土日ならfalse
@@ -62,7 +62,7 @@ function renderCalendar(date) {
         calendarDays.appendChild(emptyDiv);
     }
     
-    // 日付を生成する
+    // 日付を生成
     for (let i = 1; i <= lastDay; i++) {
         const dayDiv = document.createElement('div');
         dayDiv.classList.add('calendar-day');
@@ -93,13 +93,37 @@ function renderCalendar(date) {
         dayHeader.appendChild(dateSpan);
         dayHeader.appendChild(holidaySpan);
         
+        // 入力欄と祝日名を重ねるためのラッパー
+        const bodyWrapper = document.createElement('div');
+        bodyWrapper.classList.add('body-wrapper');
+
         // 直接入力できるエリア（編集可能）
         const inputArea = document.createElement('div');
         inputArea.classList.add('day-input');
         inputArea.contentEditable = "true";
         
+        // 入力欄の下に表示する祝日名エリア
+        const holidayNameInBody = document.createElement('div');
+        holidayNameInBody.classList.add('holiday-name-body');
+
         // 入力が変更されたときに行間を自動調整
         inputArea.addEventListener('input', () => {
+            // 自動生成テキストを除いた、ユーザーの入力があるかどうかを判定
+            const hasUserText = inputArea.innerHTML.replace(/<span class="auto-generated-text">.*?<\/span>/g, '').trim() !== '';
+
+            if (isHoliday) {
+                if (hasUserText) {
+                    // 入力がある場合、祝日名をヘッダーに移動させる
+                    if (holidayNameInBody.textContent !== '') {
+                        holidaySpan.textContent = holidayNameStr;
+                        holidayNameInBody.textContent = '';
+                    }
+                } else {
+                    // 入力がなくなり、祝日名がヘッダーにあれば、元の位置に戻す
+                    holidaySpan.textContent = ''; // ヘッダーをクリア
+                    holidayNameInBody.textContent = holidayNameStr; // 背面に祝日名を戻す
+                }
+            }
             updateLineHeight(inputArea);
         });
 
@@ -111,20 +135,6 @@ function renderCalendar(date) {
             }
         });
 
-        // 祝日かどうかを判定
-        let isHoliday = false;
-        let holidayNameStr = '';
-        const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-        if (holidays[formattedDate]) {
-            isHoliday = true;
-            dayDiv.classList.add('holiday');
-            holidayNameStr = holidays[formattedDate];
-            // 「振替休日」を「(振)」に短縮
-            holidayNameStr = holidayNameStr.replace(/\s?振替休日/, '(振)');
-            // 祝日名をヘッダーに設定
-            holidaySpan.textContent = holidayNameStr;
-        }
-        
         // 休・退会/お手続〆日を判定して追記
         if (i === 10) {
             const existingText = inputArea.innerHTML;
@@ -139,6 +149,25 @@ function renderCalendar(date) {
             inputArea.innerHTML = (existingText ? existingText + '\n' : '') + newText;
         }
         
+        // 祝日かどうかを判定
+        let isHoliday = false;
+        let holidayNameStr = '';
+        const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+        if (holidays[formattedDate]) {
+            isHoliday = true;
+            dayDiv.classList.add('holiday');
+            holidayNameStr = holidays[formattedDate].replace(/\s?振替休日/, '(振)');
+
+            // 他のテキストが入力されていなければ、入力欄の下に祝日名を入れる
+            if (inputArea.innerHTML.trim() === '') {
+                holidayNameInBody.textContent = holidayNameStr;
+            } else {
+                // 他のテキスト（お手続〆日など）が既にあれば、ヘッダーに祝日名を入れる
+                 holidaySpan.textContent = holidayNameStr;
+            }
+        }
+
+
         // マスのクリックイベント（モードに応じて処理を切り替え）
         dayDiv.addEventListener('click', (e) => {
             if (e.target === inputArea) {
@@ -153,24 +182,45 @@ function renderCalendar(date) {
 
                 // 「スタッフ不在日」をトグル
                 if (dayDiv.classList.contains('no-staff-day')) {
+                    // --- 「スタッフ不在日」を解除 ---
                     dayDiv.classList.remove('no-staff-day');
-                    inputArea.innerHTML = inputArea.innerHTML.replace(/\n?<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY<\/span>/g, '').replace(/\n?ノースタッフデー/g, '').trim();
+                    // ヘッダーのテキストを削除
                     holidaySpan.innerHTML = holidaySpan.innerHTML.replace(/<span class="no-staff-text small-text">スタッフ不在日<br>NO STAFF DAY<\/span>/g, '');
+                    // 入力欄のテキストを削除
+                    inputArea.innerHTML = inputArea.innerHTML.replace(/\n?<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY<\/span>/g, '').trim(); 
+
                     if (isHoliday) {
-                        holidaySpan.textContent = holidayNameStr; // 祝日名を復元
+                        // 祝日で、入力欄が空になったら、祝日名をヘッダーから入力欄の下に戻す
+                        if (inputArea.innerHTML.trim() === '') {
+                            holidaySpan.textContent = '';
+                            holidayNameInBody.textContent = holidayNameStr;
+                        } else {
+                            // 入力欄に何か残っていれば、ヘッダーに祝日名を表示したままにする
+                            holidaySpan.textContent = holidayNameStr;
+                        }
                     }
                     updateLineHeight(inputArea); // 行間を再計算
                 } else {
+                    // --- 「スタッフ不在日」を設定 ---
                     dayDiv.classList.add('no-staff-day');
-                    const existingText = inputArea.textContent.trim();
-                    
-                    if (existingText !== '') {
-                        // 文字が入力されている場合は、祝日名領域に小さく出す
+
+                    // 入力欄に自動生成テキスト以外の文字があるかチェック
+                    const hasUserText = inputArea.innerHTML.replace(/<span class="auto-generated-text">.*?<\/span>/g, '').trim() !== '';
+
+                    if (hasUserText) {
+                        // ユーザー入力がある場合、祝日名は表示しない
+                        holidayNameInBody.textContent = ''; // 念のため背面テキストをクリア
+
+                        // ヘッダーの既存の祝日名をクリアし、「スタッフ不在日」を表示する
                         holidaySpan.innerHTML = '<span class="no-staff-text small-text">スタッフ不在日<br>NO STAFF DAY</span>';
                     } else {
+                        // ユーザー入力がなく、祝日ならヘッダーに祝日名を表示
+                        if (isHoliday && holidayNameInBody.textContent !== '') {
+                            holidaySpan.textContent = holidayNameStr;
+                            holidayNameInBody.textContent = '';
+                        }
                         // 文字がない場合は入力欄に大きく出す
-                        const currentInput = inputArea.innerHTML;
-                        inputArea.innerHTML = (currentInput ? currentInput + '\n' : '') + '<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY</span>';
+                        inputArea.innerHTML += '<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY</span>';
                     }
                     updateLineHeight(inputArea); // 行間を再計算
                 }
@@ -178,10 +228,15 @@ function renderCalendar(date) {
                 // ノースタッフデーモードのスタイルとテキストを解除
                 if (dayDiv.classList.contains('no-staff-day')) {
                     dayDiv.classList.remove('no-staff-day');
-                    inputArea.innerHTML = inputArea.innerHTML.replace(/\n?<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY<\/span>/g, '').replace(/\n?ノースタッフデー/g, '').trim();
+                    inputArea.innerHTML = inputArea.innerHTML.replace(/\n?<span class="no-staff-text">スタッフ不在日\nNO STAFF DAY<\/span>/g, '').trim();
                     holidaySpan.innerHTML = holidaySpan.innerHTML.replace(/<span class="no-staff-text small-text">スタッフ不在日<br>NO STAFF DAY<\/span>/g, '');
+                    // 祝日名を復元
                     if (isHoliday) {
-                        holidaySpan.textContent = holidayNameStr; // 祝日名を復元
+                        if (inputArea.innerHTML.trim() === '') {
+                            holidayNameInBody.textContent = holidayNameStr;
+                        } else {
+                            holidaySpan.textContent = holidayNameStr;
+                        }
                     }
                     updateLineHeight(inputArea); // 行間を再計算
                 }
@@ -192,7 +247,9 @@ function renderCalendar(date) {
         });
         
         dayDiv.appendChild(dayHeader);
-        dayDiv.appendChild(inputArea);
+        bodyWrapper.appendChild(holidayNameInBody); // 祝日名を後ろに
+        bodyWrapper.appendChild(inputArea);       // 入力欄を前に
+        dayDiv.appendChild(bodyWrapper);
         calendarDays.appendChild(dayDiv);
         
         // DOMに追加したあとに行間を調整（初期描画時の自動入力文字などを判定）
