@@ -9,11 +9,20 @@ const textColorPicker = document.getElementById('text-color-picker');
 const textColorCode = document.getElementById('text-color-code');
 const pdfButton = document.getElementById('pdf-button');
 const copyButton = document.getElementById('copy-button');
+const resetButton = document.getElementById('reset-button');
+const undoButton = document.getElementById('undo-button');
+const redoButton = document.getElementById('redo-button');
 
 let currentDate = new Date();
 let holidays = {}; // 取得した祝日データを格納するオブジェクト
 let activeInputArea = null; // 現在選択されている入力欄を記録
 let currentDefaultTextColor = textColorPicker.value; // 現在の選択色
+
+// --- Undo/Redoのための履歴管理 ---
+let historyStack = []; // 状態の履歴を保存
+let currentHistoryIndex = -1; // 現在の履歴の位置
+let isUndoing = false;
+
 
 // 入力欄の行数をチェックして行間を調整する関数
 function updateLineHeight(element) {
@@ -27,7 +36,62 @@ function updateLineHeight(element) {
     }
 }
 
-function renderCalendar(date) {
+function getCalendarState() {
+    const year = parseInt(yearSelect.value);
+    const month = parseInt(monthSelect.value);
+    const key = `calendarData-${year}-${month}`;
+    const dayElements = calendarDays.querySelectorAll('.calendar-day:not(.empty)');
+    const dataToSave = [];
+
+    dayElements.forEach(dayDiv => {
+        const dateNumber = dayDiv.querySelector('.date-number')?.textContent;
+        if (!dateNumber) return;
+
+        const inputArea = dayDiv.querySelector('.day-input');
+        dataToSave.push({
+            date: dateNumber,
+            innerHTML: inputArea.innerHTML,
+            color: inputArea.style.color,
+            backgroundColor: dayDiv.style.backgroundColor,
+            isNoStaff: dayDiv.classList.contains('no-staff-day')
+        });
+    });
+    return dataToSave;
+}
+
+// 履歴スタックを更新するメソッド
+function updateHistory() {
+    if (isUndoing) return;
+
+    const currentState = getCalendarState();
+
+    // 履歴の末尾以降を削除（Undo後に新しい変更があった場合）
+    historyStack = historyStack.slice(0, currentHistoryIndex + 1);
+
+    // 履歴に追加
+    historyStack.push(currentState);
+    currentHistoryIndex++;
+
+    updateUndoButtonState();
+    updateRedoButtonState();
+}
+
+// 現在のカレンダーデータをlocalStorageに保存メソッド
+function saveCalendarData() {
+    const year = parseInt(yearSelect.value);
+    const month = parseInt(monthSelect.value);
+    const key = `calendarData-${year}-${month}`;
+    const dataToSave = getCalendarState();
+
+    // データがある場合のみ保存
+    if (dataToSave.length > 0) {
+        localStorage.setItem(key, JSON.stringify(dataToSave));
+    }
+
+    updateHistory();
+}
+
+function renderCalendar(date, options = { resetHistory: true }) {
     calendarDays.innerHTML = '';
     
     const year = date.getFullYear();
@@ -62,6 +126,10 @@ function renderCalendar(date) {
         calendarDays.appendChild(emptyDiv);
     }
     
+    // 保存されたデータを読み込む
+    const savedDataKey = `calendarData-${year}-${month}`;
+    const savedData = JSON.parse(localStorage.getItem(savedDataKey) || '[]');
+
     // 日付を生成
     for (let i = 1; i <= lastDay; i++) {
         const dayDiv = document.createElement('div');
@@ -120,7 +188,7 @@ function renderCalendar(date) {
                     }
                 } else {
                     // 入力がなくなり、祝日名がヘッダーにあれば、元の位置に戻す
-                    holidaySpan.textContent = ''; // ヘッダーをクリア
+                    holidaySpan.textContent = '';
                     holidayNameInBody.textContent = holidayNameStr; // 背面に祝日名を戻す
                 }
             }
@@ -145,6 +213,7 @@ function renderCalendar(date) {
                     holidayNameInBody.textContent = holidayNameStr; // 背面に祝日名を戻す
                 }
             }
+            saveCalendarData(); // フォーカスが外れた時に保存
         });
 
         // 入力欄にフォーカスが当たったときに、そのマスを選択中として記録し、色を設定
@@ -187,7 +256,22 @@ function renderCalendar(date) {
             }
         }
 
-
+        // 保存されたデータで復元
+        const dayData = savedData.find(d => d.date == i);
+        if (dayData) {
+            inputArea.innerHTML = dayData.innerHTML;
+            if (dayData.color) {
+                inputArea.style.color = dayData.color;
+            }
+            if (dayData.backgroundColor) {
+                dayDiv.style.backgroundColor = dayData.backgroundColor;
+            }
+            if (dayData.isNoStaff) {
+                dayDiv.classList.add('no-staff-day');
+            }
+            // 復元後に祝日名の表示を再調整
+            inputArea.dispatchEvent(new Event('input', { bubbles: true }));
+        }
         // マスのクリックイベント（モードに応じて処理を切り替え）
         dayDiv.addEventListener('click', (e) => {
             if (e.target === inputArea) {
@@ -264,6 +348,7 @@ function renderCalendar(date) {
                 // 色のトグル（色がついていれば消し、なければ塗る）
                 dayDiv.style.backgroundColor = dayDiv.style.backgroundColor ? '' : bgColorPicker.value;
             }
+            saveCalendarData(); // クリックイベント後に保存
         });
         
         dayDiv.appendChild(dayHeader);
@@ -282,6 +367,14 @@ function renderCalendar(date) {
         const emptyDiv = document.createElement('div');
         emptyDiv.classList.add('calendar-day', 'empty');
         calendarDays.appendChild(emptyDiv);
+    }
+
+    if (options.resetHistory) {
+        // 新しいカレンダーが描画されたので、履歴を初期化して現在の状態を保存
+        historyStack = [getCalendarState()];
+        currentHistoryIndex = 0;
+        updateUndoButtonState();
+        updateRedoButtonState();
     }
 }
 
@@ -349,6 +442,9 @@ function updateTextColor() {
     if (activeInputArea) {
         activeInputArea.style.color = currentDefaultTextColor;
     }
+    // localStorageに文字色を保存
+    localStorage.setItem('calendarTextColor', currentDefaultTextColor);
+    saveCalendarData(); // 文字色変更時に保存
 }
 
 textColorPicker.addEventListener('input', updateTextColor);
@@ -367,6 +463,101 @@ clickModeRadios.forEach(radio => {
         }
     });
 });
+
+function updateRedoButtonState() {
+    // 現在の履歴が最新の状態より前にある場合に有効化
+    redoButton.disabled = currentHistoryIndex >= historyStack.length - 1;
+}
+
+function updateUndoButtonState() {
+    // 履歴が1つ（初期状態）しかない、または履歴がない場合は無効化
+    undoButton.disabled = currentHistoryIndex <= 0;
+}
+
+
+// 元に戻すボタンのイベント
+undoButton.addEventListener('click', () => {
+    if (currentHistoryIndex > 0) {
+        isUndoing = true; // Undo操作開始のフラグ
+        currentHistoryIndex--;
+        const previousState = historyStack[currentHistoryIndex];
+        restoreCalendarState(previousState);
+        updateUndoButtonState();
+        updateRedoButtonState();
+
+        // Undo後の状態をlocalStorageにも反映
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        const key = `calendarData-${year}-${month}`;
+        localStorage.setItem(key, JSON.stringify(previousState));
+    }
+});
+
+// やり直しボタンのイベント
+redoButton.addEventListener('click', () => {
+    if (currentHistoryIndex < historyStack.length - 1) {
+        isUndoing = true; // 履歴更新をスキップするためのフラグを立てる
+        currentHistoryIndex++;
+        const nextState = historyStack[currentHistoryIndex];
+        restoreCalendarState(nextState);
+        updateUndoButtonState();
+        updateRedoButtonState();
+
+        // Redo後の状態をlocalStorageにも反映
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        const key = `calendarData-${year}-${month}`;
+        localStorage.setItem(key, JSON.stringify(nextState));
+    }
+});
+
+
+// 特定の状態にカレンダーを復元する関数
+function restoreCalendarState(state) {
+    const dayElements = calendarDays.querySelectorAll('.calendar-day:not(.empty)');
+    dayElements.forEach(dayDiv => {
+        const dateNumber = dayDiv.querySelector('.date-number')?.textContent;
+        if (!dateNumber) return;
+
+        const dayData = state.find(d => d.date == dateNumber);
+        const inputArea = dayDiv.querySelector('.day-input');
+
+        if (dayData) {
+            inputArea.innerHTML = dayData.innerHTML;
+            inputArea.style.color = dayData.color || '';
+            dayDiv.style.backgroundColor = dayData.backgroundColor || '';
+
+            if (dayData.isNoStaff) {
+                dayDiv.classList.add('no-staff-day');
+            } else {
+                dayDiv.classList.remove('no-staff-day');
+            }
+            // 復元後に祝日名や行間を再調整
+            inputArea.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    });
+
+    // isUndoingフラグを復元処理の最後にリセット
+    if (isUndoing) {
+        isUndoing = false;
+    }
+}
+
+// リセットボタンのイベント
+resetButton.addEventListener('click', () => {
+    // 履歴を更新してからリセットを実行
+    updateHistory();
+
+    const year = parseInt(yearSelect.value);
+    const month = parseInt(monthSelect.value);
+    const key = `calendarData-${year}-${month}`;
+
+    // localStorageからこの月のデータを削除
+    localStorage.removeItem(key);
+    // カレンダーを再描画してリセットを反映
+    renderCalendar(currentDate, { resetHistory: false });
+});
+
 
 // PDF化ボタンのイベント
 pdfButton.addEventListener('click', () => {
@@ -415,11 +606,33 @@ copyButton.addEventListener('click', async () => {
 
 // 初期化処理
 async function init() {
+    // localStorageから前回の文字色を読み込んで復元
+    const savedTextColor = localStorage.getItem('calendarTextColor');
+    if (savedTextColor) {
+        textColorPicker.value = savedTextColor;
+        textColorCode.value = savedTextColor.toUpperCase();
+        currentDefaultTextColor = savedTextColor;
+    }
+    const savedBgColor = localStorage.getItem('calendarBgColor');
+    if (savedBgColor) {
+        bgColorPicker.value = savedBgColor;
+        bgColorCode.value = savedBgColor.toUpperCase();
+    }
+
     await fetchHolidays(); // 最初に祝日データを取得する
     populateYearSelect(currentDate.getFullYear());
     monthSelect.value = currentDate.getMonth();
-    updateTextColor(); 
+    // updateTextColor(); // ここで呼ぶと不要な履歴が作られるため削除
     renderCalendar(currentDate);
 }
 
-init();
+// 塗りつぶし色が変更されたらlocalStorageに保存
+bgColorPicker.addEventListener('input', () => {
+    localStorage.setItem('calendarBgColor', bgColorPicker.value);
+});
+
+
+init().then(() => {
+    updateUndoButtonState(); // 初期化後にボタンの状態を更新
+    updateRedoButtonState();
+});

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>カレンダー作成アプリ</title>
     <link rel="stylesheet" href="style.css">
-    <!-- 画像化のためのライブラリ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
@@ -55,6 +54,17 @@
             <div class="color-input-wrapper">
                 <input type="color" id="bg-color-picker" value="#e6e6fa">
                 <input type="text" id="bg-color-code" value="#e6e6fa" maxlength="7">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>編集操作:</label>
+            <div class="button-group">
+                <button id="undo-button" class="action-button secondary-btn" title="1つ前に戻す">⟲</button>
+                <button id="redo-button" class="action-button secondary-btn" title="やり直し">⟳</button>
+                <button id="reset-button" class="action-button danger-btn" title="リセット">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </button>
             </div>
         </div>
 

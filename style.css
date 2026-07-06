@@ -27,7 +27,7 @@ body {
 }
 
 .control-group {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .control-group label {
@@ -105,14 +105,14 @@ select {
     width: 100%;
     padding: 12px;
     background-color: #4CAF50;
-    color: white;
+    color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 25px;
     font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
     margin-top: 15px;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
 }
 
 .action-button:hover {
@@ -125,7 +125,86 @@ select {
 }
 
 .copy-btn:hover {
-    background-color: #1976D2;
+    background-color: #1976D2; 
+}
+
+.secondary-btn {
+    position: relative;
+    background-color: transparent;
+    color: #6c757d;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.secondary-btn:hover {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+.danger-btn {
+    position: relative;
+    background-color: transparent;
+    color: #dc3545;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.danger-btn:hover {
+    background-color: #f8d7da;
+}
+.danger-btn:hover .icon {
+    fill: #721c24;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.button-group .action-button {
+    margin-top: 0; /* 個別のマージンをリセット */
+    flex: 0 1 60px; /* ボタンが広がりすぎないように幅を調整 */
+    padding: 12px; /* paddingを調整 */
+    font-size: 1.5rem; /* アイコンのサイズを調整 */
+    line-height: 1; /* アイコンの縦位置を中央に */
+}
+.button-group .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: currentColor;
+    vertical-align: middle;
+    transition: fill 0.3s ease;
+}
+
+
+
+.button-group .action-button::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    pointer-events: none; /* ツールチップがクリックの邪魔をしないように */
+}
+
+.button-group .action-button:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+.action-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
 
 .calendar-container {
@@ -212,7 +291,7 @@ select {
 .body-wrapper {
     position: relative;
     flex-grow: 1;
-    padding: 4px 2px 2px 2px; /* day-inputからpaddingをこちらに移動 */
+    padding: 4px 2px 2px 2px;
 }
 
 /* 入力欄の下に表示される祝日名 */
@@ -229,7 +308,7 @@ select {
     pointer-events: none; /* クリックイベントが下の入力欄に届くようにする */
 
     text-align: center;
-    color: #d32f2f; /* 元々の赤色 */
+    color: #d32f2f;
     font-size: 0.94rem;
     font-weight: bold;
 }
@@ -294,7 +373,7 @@ select {
     pointer-events: none;
 }
 
-/* --- レスポンシブ対応（画面幅が狭い場合） --- */
+
 @media screen and (max-width: 1024px) {
     body {
         flex-direction: column;
