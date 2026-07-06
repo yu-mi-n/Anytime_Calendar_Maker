@@ -127,6 +127,26 @@ function renderCalendar(date) {
             updateLineHeight(inputArea);
         });
 
+        // フォーカスが外れたときの処理
+        inputArea.addEventListener('blur', () => {
+            // 自動生成テキストを除いた部分を取得
+            const userContentHTML = inputArea.innerHTML.replace(/<span class="auto-generated-text">.*?<\/span>/g, '');
+            
+            // 改行や空白のみで構成されているかチェック
+            const isOnlyWhitespace = userContentHTML.replace(/<br\s*\/?>/gi, '').trim() === '';
+
+            if (isOnlyWhitespace && userContentHTML.length > 0) {
+                // 自動生成テキストのみを保持して、不要な改行や空白を削除
+                inputArea.innerHTML = inputArea.innerHTML.replace(userContentHTML, '');
+
+                // 空白削除後、入力がなくなった場合、祝日名をヘッダーから背面に戻す
+                if (isHoliday) {
+                    holidaySpan.textContent = ''; // ヘッダーをクリア
+                    holidayNameInBody.textContent = holidayNameStr; // 背面に祝日名を戻す
+                }
+            }
+        });
+
         // 入力欄にフォーカスが当たったときに、そのマスを選択中として記録し、色を設定
         inputArea.addEventListener('focus', () => {
             activeInputArea = inputArea;
